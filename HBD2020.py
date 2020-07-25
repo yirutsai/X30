@@ -133,160 +133,161 @@ class Circle(object):
         if(self.visible):
             self.pygame.draw.circle( self.canvas, self.color, self.pos , self.radius)
 
-# 初始.
-pygame.init()
-# 顯示Title.
-pygame.display.set_caption(u"打磚塊遊戲")
-# 建立畫佈大小.
-canvas = pygame.display.set_mode((canvas_width, canvas_height))
-# 時脈.
-clock = pygame.time.Clock()
+if __name__ ="__main__":
+    # 初始.
+    pygame.init()
+    # 顯示Title.
+    pygame.display.set_caption(u"打磚塊遊戲")
+    # 建立畫佈大小.
+    canvas = pygame.display.set_mode((canvas_width, canvas_height))
+    # 時脈.
+    clock = pygame.time.Clock()
 
-# 設定字型.
-font = pygame.font.SysFont("simsunnsimsun", 18)
+    # 設定字型.
+    font = pygame.font.SysFont("simsunnsimsun", 18)
 
-# 底板.
-paddle_x = 0
-paddle_y = (canvas_height - 48)
-paddle = Box(pygame, canvas, "paddle", [paddle_x, paddle_y, 100, 24], (255,255,255))
+    # 底板.
+    paddle_x = 0
+    paddle_y = (canvas_height - 48)
+    paddle = Box(pygame, canvas, "paddle", [paddle_x, paddle_y, 100, 24], (255,255,255))
 
-win =0
-# 球.
-ball_num=10
-ball_x = paddle_x
-ball_y = paddle_y
-ball   = Circle(pygame, canvas, "ball", [ball_x, ball_x], 8, (255,255,255))
-
-retry_but = Button(pygame,canvas,"retry",[340-70,315,140,50],(255,179,230))
-
-# 建立磚塊
-brick_num = 0
-brick_x = 10
-brick_y = 30
-brick_w = 0
-brick_h = 0
-for i in range( 0, 132):
-    if((i % 11)==0):
-        brick_w = 0
-        brick_h = brick_h + 21        
-    bricks_list.append (Box(pygame, canvas, "brick_"+str(i), [  brick_w + brick_x, brick_h+ brick_y, 58, 19], [255,255,255]))
-    brick_w = brick_w + 60
-# 初始遊戲.
-resetGame()
-
-#-------------------------------------------------------------------------    
-# 主迴圈.
-#-------------------------------------------------------------------------
-running = True
-while running:
-    #---------------------------------------------------------------------
-    # 判斷輸入.
-    #---------------------------------------------------------------------
-    for event in pygame.event.get():
-        # 離開遊戲.
-        if event.type == pygame.QUIT:
-            running = False
-        # 判斷按下按鈕
-        if event.type == pygame.KEYDOWN:
-            # 判斷按下ESC按鈕
-            if event.key == pygame.K_ESCAPE:
-                running = False
-                
-        # 判斷Mouse.
-        if event.type == pygame.MOUSEMOTION:
-            paddle_x = pygame.mouse.get_pos()[0] - 50
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if(game_mode == 0):
-                game_mode = 1
-            elif(game_mode==2):
-                if(340+70>pygame.mouse.get_pos()[0]>340-70 and 340+25>pygame.mouse.get_pos()[1]>315):
-                    game_mode==0
-                    resetGame()
-
-    #---------------------------------------------------------------------    
-    # 清除畫面.
-    canvas.fill(black)
-    
-    # 磚塊
-    for bricks in bricks_list:
-        # 球碰磚塊.
-        if(isCollision( ball.pos[0], ball.pos[1], bricks.rect)):
-            if(bricks.visible):                
-                # 扣除磚塊.
-                brick_num = brick_num -1
-                # 初始遊戲.
-                if(brick_num <= 0):
-                    win=1
-                    game_mode=2
-                    #resetGame()
-                    break
-                # 球反彈.
-                dy = -dy; 
-            # 關閉磚塊.
-            bricks.visible = False
-
-        # 更新磚塊.        
-        bricks.update()
-            
-    #顯示磚塊數量.
-    showFont( u"剩餘球數:"+str(ball_num), 8, 20, (255, 0, 0))
-
-    # 秀板子.
-    paddle.rect[0] = paddle_x
-    paddle.update()
-
-    # 碰撞判斷-球碰板子.
-    if(isCollision( ball.pos[0], ball.pos[1], paddle.rect)):        
-        # 球反彈.
-        dy = -dy;         
-            
+    win =0
     # 球.
-    # 0:等待開球
-    if(game_mode == 0):
-        ball.pos[0] = ball_x = paddle.rect[0] + ( (paddle.rect[2] - ball.radius) >> 1 )
-        ball.pos[1] = ball_y = paddle.rect[1] - ball.radius        
-    # 1:遊戲進行中
-    elif(game_mode == 1):
-        ball_x += dx
-        ball_y += dy
-        #判斷死亡.
-        if(ball_y + dy > canvas_height - ball.radius):
-            game_mode = 0      
-            ball_num-=1
-            if(ball_num<=0):
-                game_mode=2
+    ball_num=10
+    ball_x = paddle_x
+    ball_y = paddle_y
+    ball   = Circle(pygame, canvas, "ball", [ball_x, ball_x], 8, (255,255,255))
 
-        # 右牆或左牆碰撞.
-        if(ball_x + dx > canvas_width - ball.radius or ball_x + dx < ball.radius):
-            dx = -dx
-        # 下牆或上牆碰撞
-        if(ball_y + dy > canvas_height - ball.radius or ball_y + dy < ball.radius):        
-            dy = -dy
-        ball.pos[0] = ball_x
-        ball.pos[1] = ball_y
-    elif(game_mode==2):
-        #print("game over")
-        retry_but.visible=True
-        if(340+70>pygame.mouse.get_pos()[0]>340-70 and 340+25>pygame.mouse.get_pos()[1]>340-25):
-            retry_but.color=(221,160,221)
-        else:
-            retry_but.color = (255,179,230)
-        retry_but.update()
+    retry_but = Button(pygame,canvas,"retry",[340-70,315,140,50],(255,179,230))
 
-    # 更新球.
-    ball.update()
-    
-    # 顯示中文.
-    showFont( u"FPS:" + str(int(clock.get_fps())), 8, 2, (255, 0, 0))
+    # 建立磚塊
+    brick_num = 0
+    brick_x = 10
+    brick_y = 30
+    brick_w = 0
+    brick_h = 0
+    for i in range( 0, 132):
+        if((i % 11)==0):
+            brick_w = 0
+            brick_h = brick_h + 21        
+        bricks_list.append (Box(pygame, canvas, "brick_"+str(i), [  brick_w + brick_x, brick_h+ brick_y, 58, 19], [255,255,255]))
+        brick_w = brick_w + 60
+    # 初始遊戲.
+    resetGame()
 
-    # 更新畫面.
-    pygame.display.update()
-    clock.tick(60)
+    #-------------------------------------------------------------------------    
+    # 主迴圈.
+    #-------------------------------------------------------------------------
+    running = True
+    while running:
+        #---------------------------------------------------------------------
+        # 判斷輸入.
+        #---------------------------------------------------------------------
+        for event in pygame.event.get():
+            # 離開遊戲.
+            if event.type == pygame.QUIT:
+                running = False
+            # 判斷按下按鈕
+            if event.type == pygame.KEYDOWN:
+                # 判斷按下ESC按鈕
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+                    
+            # 判斷Mouse.
+            if event.type == pygame.MOUSEMOTION:
+                paddle_x = pygame.mouse.get_pos()[0] - 50
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if(game_mode == 0):
+                    game_mode = 1
+                elif(game_mode==2):
+                    if(340+70>pygame.mouse.get_pos()[0]>340-70 and 340+25>pygame.mouse.get_pos()[1]>315):
+                        game_mode==0
+                        resetGame()
 
-# 離開遊戲.
-pygame.quit()
-if(win==1):
-    fl = open("C:/check.txt","w")
-    fl.write("psd:30HBD")
-    fl.close()
-quit()
+        #---------------------------------------------------------------------    
+        # 清除畫面.
+        canvas.fill(black)
+        
+        # 磚塊
+        for bricks in bricks_list:
+            # 球碰磚塊.
+            if(isCollision( ball.pos[0], ball.pos[1], bricks.rect)):
+                if(bricks.visible):                
+                    # 扣除磚塊.
+                    brick_num = brick_num -1
+                    # 初始遊戲.
+                    if(brick_num <= 0):
+                        win=1
+                        game_mode=2
+                        #resetGame()
+                        break
+                    # 球反彈.
+                    dy = -dy; 
+                # 關閉磚塊.
+                bricks.visible = False
+
+            # 更新磚塊.        
+            bricks.update()
+                
+        #顯示磚塊數量.
+        showFont( u"剩餘球數:"+str(ball_num), 8, 20, (255, 0, 0))
+
+        # 秀板子.
+        paddle.rect[0] = paddle_x
+        paddle.update()
+
+        # 碰撞判斷-球碰板子.
+        if(isCollision( ball.pos[0], ball.pos[1], paddle.rect)):        
+            # 球反彈.
+            dy = -dy;         
+                
+        # 球.
+        # 0:等待開球
+        if(game_mode == 0):
+            ball.pos[0] = ball_x = paddle.rect[0] + ( (paddle.rect[2] - ball.radius) >> 1 )
+            ball.pos[1] = ball_y = paddle.rect[1] - ball.radius        
+        # 1:遊戲進行中
+        elif(game_mode == 1):
+            ball_x += dx
+            ball_y += dy
+            #判斷死亡.
+            if(ball_y + dy > canvas_height - ball.radius):
+                game_mode = 0      
+                ball_num-=1
+                if(ball_num<=0):
+                    game_mode=2
+
+            # 右牆或左牆碰撞.
+            if(ball_x + dx > canvas_width - ball.radius or ball_x + dx < ball.radius):
+                dx = -dx
+            # 下牆或上牆碰撞
+            if(ball_y + dy > canvas_height - ball.radius or ball_y + dy < ball.radius):        
+                dy = -dy
+            ball.pos[0] = ball_x
+            ball.pos[1] = ball_y
+        elif(game_mode==2):
+            #print("game over")
+            retry_but.visible=True
+            if(340+70>pygame.mouse.get_pos()[0]>340-70 and 340+25>pygame.mouse.get_pos()[1]>340-25):
+                retry_but.color=(221,160,221)
+            else:
+                retry_but.color = (255,179,230)
+            retry_but.update()
+
+        # 更新球.
+        ball.update()
+        
+        # 顯示中文.
+        showFont( u"FPS:" + str(int(clock.get_fps())), 8, 2, (255, 0, 0))
+
+        # 更新畫面.
+        pygame.display.update()
+        clock.tick(60)
+
+    # 離開遊戲.
+    pygame.quit()
+    if(win==1):
+        fl = open("C:/check.txt","w")
+        fl.write("psd:30HBD")
+        fl.close()
+    quit()
