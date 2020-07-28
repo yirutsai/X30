@@ -8,26 +8,6 @@ from pygame.locals import *
 
 #from drew import *
 
-# 視窗大小.
-canvas_height = 680
-canvas_width = 680
-
-# 顏色.
-black = (0,0,0)
-
-# 磚塊數量串列.
-bricks_list = []
-
-# 移動速度.
-
-dx =  6*random.choice([-1,1])
-dy = -6*random.choice([-1,1])
-
-# 遊戲狀態.
-# 0:等待開球
-# 1:遊戲進行中
-game_mode = 0
-
 #-------------------------------------------------------------------------
 # 函數:秀字.
 #-------------------------------------------------------------------------
@@ -139,7 +119,27 @@ class Circle(object):
         if(self.visible):
             self.pygame.draw.circle( self.canvas, self.color, self.pos , self.radius)
 
-if __name__ =="__main__":
+def run():
+    # 視窗大小.
+    canvas_height = 680
+    canvas_width = 680
+
+    # 顏色.
+    black = (0,0,0)
+
+    # 磚塊數量串列.
+    bricks_list = []
+
+    # 移動速度.
+
+    dx =  6*random.choice([-1,1])
+    dy = -6*random.choice([-1,1])
+
+    # 遊戲狀態.
+    # 0:等待開球
+    # 1:遊戲進行中
+    game_mode = 0
+
     # 初始.
     pygame.init()
     # 顯示Title.
