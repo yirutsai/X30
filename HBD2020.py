@@ -20,8 +20,8 @@ bricks_list = []
 
 # 移動速度.
 
-dx =  7*random.choice([-1,1])
-dy = -7*random.choice([-1,1])
+dx =  6*random.choice([-1,1])
+dy = -6*random.choice([-1,1])
 
 # 遊戲狀態.
 # 0:等待開球
@@ -42,10 +42,16 @@ def showFont( text, x, y, color):
 #   y       : y 
 #   boxRect : 矩形
 #-------------------------------------------------------------------------
-def isCollision( x, y, boxRect):
-    if (x >= boxRect[0] and x <= boxRect[0] + boxRect[2] and y >= boxRect[1] and y <= boxRect[1] + boxRect[3]):
-        return True;          
-    return False;  
+def isCollisionUD( x, y, boxRect):
+    if (x >= boxRect[0] and x <= boxRect[0] + boxRect[2]):
+        if((y >= boxRect[1] + boxRect[3]-7 and y <= boxRect[1] + boxRect[3])or (y >= boxRect[1] and y <= boxRect[1] +7)):
+            return True;          
+    return False;
+def isCollisionLR( x, y, boxRect):
+    if (y >= boxRect[1] and y <= boxRect[1] + boxRect[3]):
+        if((x >= boxRect[0] and x <= boxRect[0] +7) or (x >=boxRect[0] + boxRect[2]-7 and x <= boxRect[0] + boxRect[2])):
+            return True;          
+    return False;
 
 #-------------------------------------------------------------------------
 # 函數:初始遊戲.
@@ -70,8 +76,8 @@ def resetGame():
     # 磚塊數量.
     brick_num = 132    
     # 移動速度.
-    dx =  8
-    dy = -8
+    dx =  6*random.choice([-1,1])
+    dy = -6*random.choice([-1,1])
     ball_num=10
 
 class Box(object):
@@ -133,7 +139,7 @@ class Circle(object):
         if(self.visible):
             self.pygame.draw.circle( self.canvas, self.color, self.pos , self.radius)
 
-if __name__ ="__main__":
+if __name__ =="__main__":
     # 初始.
     pygame.init()
     # 顯示Title.
@@ -169,17 +175,20 @@ if __name__ ="__main__":
     for i in range( 0, 132):
         if((i % 11)==0):
             brick_w = 0
-            brick_h = brick_h + 21        
-        bricks_list.append (Box(pygame, canvas, "brick_"+str(i), [  brick_w + brick_x, brick_h+ brick_y, 58, 19], [255,255,255]))
+            brick_h = brick_h + 30        
+        bricks_list.append (Box(pygame, canvas, "brick_"+str(i), [  brick_w + brick_x, brick_h+ brick_y, 59.5, 29], [255,255,255]))
         brick_w = brick_w + 60
     # 初始遊戲.
     resetGame()
+    img = pygame.image.load(os.path.join(os.path.dirname(__file__),"cover.jpg"))
+    img.convert()
 
     #-------------------------------------------------------------------------    
     # 主迴圈.
     #-------------------------------------------------------------------------
     running = True
     while running:
+        
         #---------------------------------------------------------------------
         # 判斷輸入.
         #---------------------------------------------------------------------
@@ -201,17 +210,35 @@ if __name__ ="__main__":
                     game_mode = 1
                 elif(game_mode==2):
                     if(340+70>pygame.mouse.get_pos()[0]>340-70 and 340+25>pygame.mouse.get_pos()[1]>315):
-                        game_mode==0
-                        resetGame()
+                        if(win==0):
+                            game_mode==0
+                            resetGame()
+                        else:
+                            running = False
+                        
 
         #---------------------------------------------------------------------    
         # 清除畫面.
         canvas.fill(black)
-        
+        canvas.blit(img,(120,60))
         # 磚塊
         for bricks in bricks_list:
             # 球碰磚塊.
-            if(isCollision( ball.pos[0], ball.pos[1], bricks.rect)):
+            if(isCollisionUD( ball.pos[0], ball.pos[1], bricks.rect)):
+                if(bricks.visible):                
+                    # 扣除磚塊.
+                    brick_num = brick_num -1
+                    # 初始遊戲.
+                    if(brick_num <= 0):
+                        win=1
+                        game_mode=2
+                        #resetGame()
+                        #break
+                    # 球反彈.
+                    dy = -dy; 
+                # 關閉磚塊.
+                bricks.visible = False
+            elif(isCollisionLR( ball.pos[0], ball.pos[1], bricks.rect)):
                 if(bricks.visible):                
                     # 扣除磚塊.
                     brick_num = brick_num -1
@@ -222,10 +249,9 @@ if __name__ ="__main__":
                         #resetGame()
                         break
                     # 球反彈.
-                    dy = -dy; 
+                    dx = -dx; 
                 # 關閉磚塊.
                 bricks.visible = False
-
             # 更新磚塊.        
             bricks.update()
                 
@@ -237,7 +263,7 @@ if __name__ ="__main__":
         paddle.update()
 
         # 碰撞判斷-球碰板子.
-        if(isCollision( ball.pos[0], ball.pos[1], paddle.rect)):        
+        if(isCollisionUD( ball.pos[0], ball.pos[1], paddle.rect)):        
             # 球反彈.
             dy = -dy;         
                 
